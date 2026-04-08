@@ -25,14 +25,51 @@ var DEMO_SCHEDULE = (function() {
 // ── AUTH ─────────────────────────────────────────────────────
 function checkAuth() {
   var val = document.getElementById('passcodeInput').value.trim();
-  var stored = localStorage.getItem('cssa_passcode') || 'softball';
-  if (val === stored || val === 'softball') {
-    document.getElementById('authWall').style.display = 'none';
-    initApp();
-  } else {
-    document.getElementById('authError').textContent = 'Wrong passcode. Try again.';
-    document.getElementById('passcodeInput').value = '';
+  var url = localStorage.getItem('cssa_script_url') || '';
+
+  // If no script URL configured yet, accept 'softball' to get into Config
+  if (!url) {
+    if (val === 'softball') {
+      document.getElementById('authWall').style.display = 'none';
+      initApp();
+    } else {
+      document.getElementById('authError').textContent = 'No script URL set. Use passcode: softball';
+      document.getElementById('passcodeInput').value = '';
+    }
+    return;
   }
+
+  // Check passcode against the server
+  var btn = document.getElementById('authEnterBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+
+  fetch(url + '?action=checkPasscode&passcode=' + encodeURIComponent(val))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.valid) {
+        PASSCODE = val;
+        document.getElementById('authWall').style.display = 'none';
+        initApp();
+      } else {
+        document.getElementById('authError').textContent = 'Wrong passcode. Try again.';
+        document.getElementById('passcodeInput').value = '';
+        btn.disabled = false;
+        btn.textContent = 'Enter';
+      }
+    })
+    .catch(function() {
+      // If server unreachable, fall back to local check
+      var stored = localStorage.getItem('cssa_passcode') || 'softball';
+      if (val === stored || val === 'softball') {
+        document.getElementById('authWall').style.display = 'none';
+        initApp();
+      } else {
+        document.getElementById('authError').textContent = 'Could not reach server. Try again.';
+        btn.disabled = false;
+        btn.textContent = 'Enter';
+      }
+    });
 }
 
 // ── NAV ──────────────────────────────────────────────────────
@@ -275,9 +312,7 @@ function renderSchedule(games) {
 // ── CONFIG ────────────────────────────────────────────────────
 function saveConfig() {
   SCRIPT_URL = document.getElementById('scriptUrl').value.trim();
-  PASSCODE   = document.getElementById('passcodeConfig').value.trim();
   localStorage.setItem('cssa_script_url', SCRIPT_URL);
-  localStorage.setItem('cssa_passcode', PASSCODE);
   document.getElementById('configStatus').textContent = 'Saved. Reload to reconnect.';
   showToast('Config saved!');
 }

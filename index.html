@@ -6,793 +6,134 @@
 <title>CSSA Yakima Softball</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;600;700&display=swap');
-
   :root {
-    --green: #3B6D11;
-    --green-light: #EAF3DE;
-    --green-mid: #639922;
-    --amber: #BA7517;
-    --amber-light: #FAEEDA;
-    --red: #A32D2D;
-    --red-light: #FCEBEB;
-    --gray: #5F5E5A;
-    --gray-light: #F1EFE8;
-    --border: #D3D1C7;
-    --text: #2C2C2A;
-    --text-muted: #888780;
-    --bg: #fafaf8;
-    --card: #ffffff;
+    --green: #3B6D11; --green-mid: #639922; --amber: #BA7517;
+    --red: #A32D2D; --gray: #5F5E5A; --gray-light: #F1EFE8;
+    --border: #D3D1C7; --text: #2C2C2A; --text-muted: #888780;
+    --bg: #fafaf8; --card: #ffffff;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Barlow Condensed', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
-
-  header {
-    background: var(--green);
-    color: white;
-    padding: 1.25rem 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 4px solid var(--green-mid);
-  }
-
-  header h1 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  header span {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    opacity: 0.7;
-  }
-
-  nav {
-    display: flex;
-    gap: 0;
-    background: var(--gray-light);
-    border-bottom: 1px solid var(--border);
-  }
-
-  nav button {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--gray);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  nav button.active {
-    color: var(--green);
-    border-bottom-color: var(--green);
-    background: white;
-  }
-
-  nav button:hover:not(.active) {
-    color: var(--text);
-    background: var(--border);
-  }
-
+  body { font-family: 'Barlow Condensed', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  header { background: var(--green); color: white; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--green-mid); }
+  header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+  header span { font-family: 'DM Mono', monospace; font-size: 0.75rem; opacity: 0.7; }
+  nav { display: flex; background: var(--gray-light); border-bottom: 1px solid var(--border); }
+  nav button { flex: 1; padding: 0.75rem 1rem; background: none; border: none; border-bottom: 3px solid transparent; font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--gray); cursor: pointer; }
+  nav button.active { color: var(--green); border-bottom-color: var(--green); background: white; }
+  nav button:hover:not(.active) { color: var(--text); background: var(--border); }
   main { padding: 1.25rem 1rem; max-width: 700px; margin: 0 auto; }
-
   .view { display: none; }
   .view.active { display: block; }
-
-  /* --- STANDINGS --- */
-
-  .standings-header {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-    gap: 4px;
-    padding: 0.4rem 0.75rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 4px;
-  }
-
+  .standings-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 4px; padding: 0.4rem 0.75rem; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
   .standings-header span:not(:first-child) { text-align: center; }
-
-  .team-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-    gap: 4px;
-    align-items: center;
-    padding: 0.6rem 0.75rem;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    margin-bottom: 6px;
-    transition: box-shadow 0.15s;
-  }
-
-  .team-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-
-  .team-rank {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    margin-right: 6px;
-  }
-
-  .team-name {
-    font-size: 1rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .team-stat {
-    text-align: center;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.9rem;
-  }
-
-  .rd-pos { color: var(--green); }
-  .rd-neg { color: var(--red); }
-  .rd-zero { color: var(--gray); }
-
-  .rank-1 .team-name { color: var(--amber); }
-  .rank-1 { border-left: 3px solid var(--amber); }
-  .rank-2 { border-left: 3px solid #B4B2A9; }
-  .rank-3 { border-left: 3px solid #A0785A; }
-
-  /* --- SCHEDULE / SCORE ENTRY --- */
-
+  .team-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 4px; align-items: center; padding: 0.6rem 0.75rem; background: var(--card); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 6px; }
+  .team-rank { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text-muted); margin-right: 6px; }
+  .team-name { font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .team-stat { text-align: center; font-family: 'DM Mono', monospace; font-size: 0.9rem; }
+  .rd-pos { color: var(--green); } .rd-neg { color: var(--red); } .rd-zero { color: var(--gray); }
+  .rank-1 .team-name { color: var(--amber); } .rank-1 { border-left: 3px solid var(--amber); }
+  .rank-2 { border-left: 3px solid #B4B2A9; } .rank-3 { border-left: 3px solid #A0785A; }
+  .pct { color: var(--text-muted); font-size: 0.75rem; }
   .week-group { margin-bottom: 1.5rem; }
-
-  .week-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    padding: 0.25rem 0;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 0.5rem;
-  }
-
-  .game-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 8px;
-    align-items: center;
-  }
-
+  .week-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); padding: 0.25rem 0; border-bottom: 1px solid var(--border); margin-bottom: 0.5rem; }
+  .game-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
   .game-card.scored { border-left: 3px solid var(--green); }
-
-  .team-side {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
+  .team-side { display: flex; flex-direction: column; gap: 4px; }
   .team-side.away { text-align: right; align-items: flex-end; }
-
-  .team-label {
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  .score-input {
-    width: 56px;
-    padding: 0.3rem 0.5rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 1.1rem;
-    font-weight: 500;
-    text-align: center;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--gray-light);
-    color: var(--text);
-  }
-
-  .score-input:focus {
-    outline: none;
-    border-color: var(--green-mid);
-    background: white;
-  }
-
-  .vs-badge {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    text-align: center;
-    padding: 0 4px;
-  }
-
-  .save-btn {
-    margin-top: 4px;
-    padding: 0.3rem 0.75rem;
-    background: var(--green);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-
+  .team-label { font-size: 0.9rem; font-weight: 600; }
+  .score-input { width: 56px; padding: 0.3rem 0.5rem; font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 500; text-align: center; border: 1px solid var(--border); border-radius: 4px; background: var(--gray-light); color: var(--text); }
+  .score-input:focus { outline: none; border-color: var(--green-mid); background: white; }
+  .vs-badge { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--text-muted); text-align: center; padding: 0 4px; }
+  .save-btn { margin-top: 4px; padding: 0.3rem 0.75rem; background: var(--green); color: white; border: none; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
   .save-btn:hover { background: var(--green-mid); }
   .save-btn:disabled { background: var(--border); color: var(--text-muted); cursor: default; }
-
-  .saved-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--green);
-    text-align: center;
-  }
-
-  /* --- AUTH --- */
-
-  .auth-wall {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-  }
-
-  .auth-card {
-    background: var(--card);
-    border-radius: 10px;
-    padding: 2rem;
-    width: 300px;
-    text-align: center;
-    border: 1px solid var(--border);
-  }
-
-  .auth-card h2 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 0.25rem;
-  }
-
-  .auth-card p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 1.25rem;
-  }
-
-  .auth-card input {
-    width: 100%;
-    padding: 0.6rem 0.75rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    text-align: center;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.75rem;
-    background: var(--gray-light);
-  }
-
+  .saved-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--green); text-align: center; }
+  .auth-wall { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .auth-card { background: var(--card); border-radius: 10px; padding: 2rem; width: 300px; text-align: center; border: 1px solid var(--border); }
+  .auth-card h2 { font-size: 1.3rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.25rem; }
+  .auth-card p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+  .auth-card input { width: 100%; padding: 0.6rem 0.75rem; font-family: 'DM Mono', monospace; font-size: 1rem; border: 1px solid var(--border); border-radius: 5px; text-align: center; letter-spacing: 0.15em; margin-bottom: 0.75rem; background: var(--gray-light); }
   .auth-card input:focus { outline: none; border-color: var(--green-mid); background: white; }
-
-  .auth-card button {
-    width: 100%;
-    padding: 0.65rem;
-    background: var(--green);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-  }
-
-  .auth-error {
-    color: var(--red);
-    font-size: 0.8rem;
-    margin-top: 0.5rem;
-  }
-
-  /* --- ADMIN CONFIG --- */
-
-  .config-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .config-section h3 {
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 0.75rem;
-  }
-
-  .config-section input {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: var(--gray-light);
-    color: var(--text);
-    margin-bottom: 0.5rem;
-  }
-
+  #authEnterBtn { width: 100%; padding: 0.65rem; background: var(--green); color: white; border: none; border-radius: 5px; font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+  .auth-error { color: var(--red); font-size: 0.8rem; margin-top: 0.5rem; }
+  .config-section { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem; }
+  .config-section h3 { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem; }
+  .config-section input { width: 100%; padding: 0.5rem 0.75rem; font-family: 'DM Mono', monospace; font-size: 0.85rem; border: 1px solid var(--border); border-radius: 4px; background: var(--gray-light); color: var(--text); margin-bottom: 0.5rem; }
   .config-section input:focus { outline: none; border-color: var(--green-mid); background: white; }
-
-  .config-section label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    display: block;
-    margin-bottom: 2px;
-  }
-
-  .action-btn {
-    padding: 0.5rem 1rem;
-    background: var(--green);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    margin-right: 0.5rem;
-    margin-top: 0.5rem;
-  }
-
-  .action-btn.secondary {
-    background: none;
-    color: var(--green);
-    border: 1px solid var(--green);
-  }
-
-  .toast {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--text);
-    color: white;
-    padding: 0.5rem 1.25rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    opacity: 0;
-    transition: opacity 0.2s;
-    z-index: 200;
-    pointer-events: none;
-  }
-
+  .config-section label { font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 2px; }
+  .action-btn { padding: 0.5rem 1rem; background: var(--green); color: white; border: none; border-radius: 4px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-right: 0.5rem; margin-top: 0.5rem; }
+  .action-btn.secondary { background: none; color: var(--green); border: 1px solid var(--green); }
+  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--text); color: white; padding: 0.5rem 1.25rem; border-radius: 20px; font-size: 0.85rem; opacity: 0; transition: opacity 0.2s; z-index: 200; pointer-events: none; }
   .toast.show { opacity: 1; }
-
-  .loading {
-    text-align: center;
-    padding: 2rem;
-    color: var(--text-muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-  }
-
-  .pct { color: var(--text-muted); font-size: 0.75rem; }
-
-  .status-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    display: inline-block;
-    margin-right: 4px;
-  }
-  .dot-live { background: #4CAF50; }
-  .dot-demo { background: var(--amber); }
+  .loading { text-align: center; padding: 2rem; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 0.85rem; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+  .dot-live { background: #4CAF50; } .dot-demo { background: var(--amber); }
 </style>
 </head>
 <body>
 
-<!-- Auth wall (shown when not authenticated) -->
 <div class="auth-wall" id="authWall">
   <div class="auth-card">
     <h2>CSSA Softball</h2>
-    <p>Enter passcode to enter scores</p>
+    <p>Enter passcode to continue</p>
     <input type="password" id="passcodeInput" placeholder="••••••" maxlength="12" />
-    <button onclick="checkAuth()">Enter</button>
+    <button type="button" id="authEnterBtn">Enter</button>
     <div class="auth-error" id="authError"></div>
   </div>
 </div>
 
 <header>
-  <h1>⚾ CSSA Yakima</h1>
+  <h1>CSSA Yakima</h1>
   <span id="connectionStatus"><span class="status-dot dot-demo"></span>DEMO MODE</span>
 </header>
 
 <nav>
-  <button class="active" onclick="showView('standings')">Standings</button>
-  <button onclick="showView('schedule')">Enter Scores</button>
-  <button onclick="showView('admin')">Config</button>
+  <button type="button" id="navStandings" class="active">Standings</button>
+  <button type="button" id="navSchedule">Enter Scores</button>
+  <button type="button" id="navAdmin">Config</button>
 </nav>
 
 <main>
-  <!-- STANDINGS VIEW -->
   <div class="view active" id="view-standings">
     <div class="loading" id="standingsLoading">Loading standings...</div>
     <div id="standingsContent" style="display:none">
       <div class="standings-header">
-        <span>Team</span>
-        <span>W</span>
-        <span>L</span>
-        <span>PCT</span>
-        <span>RD</span>
+        <span>Team</span><span>W</span><span>L</span><span>PCT</span><span>RD</span>
       </div>
       <div id="standingsRows"></div>
     </div>
   </div>
 
-  <!-- SCHEDULE/SCORES VIEW -->
   <div class="view" id="view-schedule">
     <div class="loading" id="scheduleLoading">Loading schedule...</div>
     <div id="scheduleContent" style="display:none"></div>
   </div>
 
-  <!-- ADMIN VIEW -->
   <div class="view" id="view-admin">
     <div class="config-section">
       <h3>Google Apps Script URL</h3>
       <label>Paste your deployed script URL here</label>
       <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/.../exec" />
-      <label>Admin passcode (set what scorekeepers will enter)</label>
-      <input type="text" id="passcode" placeholder="e.g. cssa2026" />
+      <label>Scorekeeper passcode</label>
+      <input type="text" id="passcodeConfig" placeholder="e.g. cssa2026" />
       <br>
-      <button class="action-btn" onclick="saveConfig()">Save Config</button>
-      <button class="action-btn secondary" onclick="testConnection()">Test Connection</button>
+      <button type="button" class="action-btn" id="saveConfigBtn">Save Config</button>
+      <button type="button" class="action-btn secondary" id="testConnectionBtn">Test Connection</button>
       <div id="configStatus" style="margin-top:0.5rem;font-size:0.8rem;color:var(--text-muted)"></div>
     </div>
     <div class="config-section">
       <h3>Google Sheet Setup</h3>
-      <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.5">
+      <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.6">
         Your Sheet needs two tabs:<br>
-        <strong>Schedule</strong>: Week | Date | Home Team | Away Team | Home Score | Away Score<br>
-        <strong>Teams</strong>: Team Name (one per row)<br><br>
-        See the included <code>Code.gs</code> file for the Apps Script to paste.
+        <strong>Schedule</strong>: ID | Week | Date | Home Team | Away Team | Home Score | Away Score<br>
+        <strong>Teams</strong>: Team Name (one per row, with header row)<br><br>
+        Deploy Apps Script as Web App: Execute as Me, Access: Anyone.
       </p>
     </div>
   </div>
 </main>
 
 <div class="toast" id="toast"></div>
-
-<script>
-// ── CONFIG ──────────────────────────────────────────────────
-let SCRIPT_URL = localStorage.getItem('cssa_script_url') || '';
-let PASSCODE   = localStorage.getItem('cssa_passcode') || 'softball';
-
-// Ensure default is always saved so auth works on first visit
-if (!localStorage.getItem('cssa_passcode')) {
-  localStorage.setItem('cssa_passcode', 'softball');
-}
-let authed     = false;
-
-// Demo data shown when no script URL is configured
-const DEMO_TEAMS = ['Sluggers','Dirt Bags','Diamond Dogs','The Bench','Fly Ballers',
-                    'Iron Mitts','Bases Loaded','Mudcats','The Naturals','Home Plates'];
-
-const DEMO_SCHEDULE = generateDemoSchedule();
-
-function generateDemoSchedule() {
-  const games = [];
-  let id = 1;
-  for (let week = 1; week <= 10; week++) {
-    for (let g = 0; g < 5; g++) {
-      const home = g * 2;
-      const away = g * 2 + 1;
-      games.push({
-        id: id++, week,
-        home: DEMO_TEAMS[home],
-        away: DEMO_TEAMS[away],
-        homeScore: week < 4 ? Math.floor(Math.random()*10)+2 : null,
-        awayScore: week < 4 ? Math.floor(Math.random()*10)+2 : null
-      });
-    }
-  }
-  return games;
-}
-
-// ── AUTH ────────────────────────────────────────────────────
-function checkAuth() {
-  const val = document.getElementById('passcodeInput').value.trim();
-  const stored = localStorage.getItem('cssa_passcode') || 'softball';
-  if (val === stored || val === 'softball') {
-    PASSCODE = stored;
-    authed = true;
-    document.getElementById('authWall').style.display = 'none';
-    initApp();
-  } else {
-    document.getElementById('authError').textContent = 'Wrong passcode. Try again.';
-    document.getElementById('passcodeInput').value = '';
-  }
-}
-document.getElementById('passcodeInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') checkAuth();
-});
-
-// ── NAV ──────────────────────────────────────────────────────
-function showView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  event.target.classList.add('active');
-}
-
-// ── INIT ────────────────────────────────────────────────────
-function initApp() {
-  loadConfig();
-  if (SCRIPT_URL) {
-    fetchData();
-  } else {
-    renderDemoStandings();
-    renderDemoSchedule();
-    document.getElementById('connectionStatus').innerHTML =
-      '<span class="status-dot dot-demo"></span>DEMO MODE';
-  }
-}
-
-function loadConfig() {
-  document.getElementById('scriptUrl').value = SCRIPT_URL;
-  document.getElementById('passcode').value = PASSCODE;
-}
-
-// ── GOOGLE SHEETS FETCH ──────────────────────────────────────
-async function fetchData() {
-  try {
-    const res = await fetch(SCRIPT_URL + '?action=getAll');
-    const data = await res.json();
-    renderStandings(data.games, data.teams);
-    renderSchedule(data.games);
-    document.getElementById('connectionStatus').innerHTML =
-      '<span class="status-dot dot-live"></span>LIVE';
-  } catch(e) {
-    showToast('Connection failed — showing demo data');
-    renderDemoStandings();
-    renderDemoSchedule();
-  }
-}
-
-async function saveScore(gameId, homeScore, awayScore, btn, savedLabel) {
-  btn.disabled = true;
-  btn.textContent = 'Saving...';
-  if (!SCRIPT_URL) {
-    // Demo mode — just update local demo data
-    const game = DEMO_SCHEDULE.find(g => g.id === gameId);
-    if (game) { game.homeScore = homeScore; game.awayScore = awayScore; }
-    btn.style.display = 'none';
-    savedLabel.style.display = 'block';
-    renderDemoStandings();
-    showToast('Score saved (demo)');
-    return;
-  }
-  try {
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'saveScore', gameId, homeScore, awayScore }),
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const data = await res.json();
-    if (data.success) {
-      btn.style.display = 'none';
-      savedLabel.style.display = 'block';
-      fetchData();
-      showToast('Score saved!');
-    } else {
-      btn.disabled = false;
-      btn.textContent = 'Save';
-      showToast('Error saving score');
-    }
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Save';
-    showToast('Network error');
-  }
-}
-
-// ── STANDINGS ────────────────────────────────────────────────
-function calcStandings(games) {
-  const teams = {};
-  games.forEach(g => {
-    [g.home, g.away].forEach(t => {
-      if (!teams[t]) teams[t] = { name: t, w: 0, l: 0, rs: 0, ra: 0 };
-    });
-    if (g.homeScore !== null && g.awayScore !== null) {
-      const h = teams[g.home], a = teams[g.away];
-      h.rs += g.homeScore; h.ra += g.awayScore;
-      a.rs += g.awayScore; a.ra += g.homeScore;
-      if (g.homeScore > g.awayScore) { h.w++; a.l++; }
-      else if (g.awayScore > g.homeScore) { a.w++; h.l++; }
-      else { h.w += 0.5; a.w += 0.5; } // tie
-    }
-  });
-  return Object.values(teams).sort((a,b) => {
-    const wa = a.w/(a.w+a.l||1), wb = b.w/(b.w+b.l||1);
-    if (wb !== wa) return wb - wa;
-    return (b.rs-b.ra) - (a.rs-a.ra);
-  });
-}
-
-function renderStandings(games, teamList) {
-  const standings = calcStandings(games);
-  renderStandingsRows(standings);
-}
-
-function renderDemoStandings() {
-  const standings = calcStandings(DEMO_SCHEDULE);
-  renderStandingsRows(standings);
-}
-
-function renderStandingsRows(standings) {
-  document.getElementById('standingsLoading').style.display = 'none';
-  document.getElementById('standingsContent').style.display = 'block';
-  const container = document.getElementById('standingsRows');
-  container.innerHTML = '';
-  standings.forEach((t, i) => {
-    const gp = t.w + t.l;
-    const pct = gp > 0 ? (t.w / gp).toFixed(3) : '.000';
-    const rd = t.rs - t.ra;
-    const rdClass = rd > 0 ? 'rd-pos' : rd < 0 ? 'rd-neg' : 'rd-zero';
-    const rdStr = rd > 0 ? '+' + rd : rd;
-    const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
-    container.innerHTML += `
-      <div class="team-row ${rankClass}">
-        <div class="team-name"><span class="team-rank">${i+1}</span>${t.name}</div>
-        <div class="team-stat">${t.w}</div>
-        <div class="team-stat">${t.l}</div>
-        <div class="team-stat pct">${pct}</div>
-        <div class="team-stat ${rdClass}">${rdStr}</div>
-      </div>`;
-  });
-}
-
-// ── SCHEDULE ────────────────────────────────────────────────
-function renderDemoSchedule() {
-  renderSchedule(DEMO_SCHEDULE);
-}
-
-function renderSchedule(games) {
-  document.getElementById('scheduleLoading').style.display = 'none';
-  const container = document.getElementById('scheduleContent');
-  container.style.display = 'block';
-  container.innerHTML = '';
-
-  // Group by week
-  const weeks = {};
-  games.forEach(g => {
-    if (!weeks[g.week]) weeks[g.week] = [];
-    weeks[g.week].push(g);
-  });
-
-  Object.keys(weeks).sort((a,b)=>a-b).forEach(week => {
-    const div = document.createElement('div');
-    div.className = 'week-group';
-    div.innerHTML = `<div class="week-label">Week ${week}</div>`;
-
-    weeks[week].forEach(game => {
-      const scored = game.homeScore !== null && game.awayScore !== null;
-      const card = document.createElement('div');
-      card.className = 'game-card' + (scored ? ' scored' : '');
-
-      const homeVal = game.homeScore !== null ? game.homeScore : '';
-      const awayVal = game.awayScore !== null ? game.awayScore : '';
-
-      card.innerHTML = `
-        <div class="team-side away">
-          <div class="team-label">${game.away}</div>
-          <input class="score-input" type="number" min="0" max="99" value="${awayVal}" placeholder="—" id="away-${game.id}" />
-        </div>
-        <div class="vs-badge">
-          VS<br>
-          <button class="save-btn" id="btn-${game.id}" onclick="handleSave(${game.id})">Save</button>
-          <div class="saved-label" id="saved-${game.id}" style="display:${scored?'block':'none'}">${scored?'✓ saved':''}</div>
-        </div>
-        <div class="team-side">
-          <div class="team-label">${game.home}</div>
-          <input class="score-input" type="number" min="0" max="99" value="${homeVal}" placeholder="—" id="home-${game.id}" />
-        </div>`;
-
-      if (scored) {
-        card.querySelector('.save-btn').style.display = 'none';
-      }
-
-      // Re-show save btn when values change
-      ['home','away'].forEach(side => {
-        card.querySelector(`#${side}-${game.id}`).addEventListener('input', () => {
-          card.querySelector(`#btn-${game.id}`).style.display = 'inline-block';
-          card.querySelector(`#saved-${game.id}`).style.display = 'none';
-          card.querySelector(`#btn-${game.id}`).disabled = false;
-          card.querySelector(`#btn-${game.id}`).textContent = 'Save';
-        });
-      });
-
-      div.appendChild(card);
-    });
-
-    container.appendChild(div);
-  });
-}
-
-function handleSave(gameId) {
-  const homeScore = parseInt(document.getElementById('home-' + gameId).value);
-  const awayScore = parseInt(document.getElementById('away-' + gameId).value);
-  if (isNaN(homeScore) || isNaN(awayScore)) {
-    showToast('Enter both scores first');
-    return;
-  }
-  const btn = document.getElementById('btn-' + gameId);
-  const savedLabel = document.getElementById('saved-' + gameId);
-  saveScore(gameId, homeScore, awayScore, btn, savedLabel);
-}
-
-// ── CONFIG ───────────────────────────────────────────────────
-function saveConfig() {
-  SCRIPT_URL = document.getElementById('scriptUrl').value.trim();
-  PASSCODE   = document.getElementById('passcode').value.trim();
-  localStorage.setItem('cssa_script_url', SCRIPT_URL);
-  localStorage.setItem('cssa_passcode', PASSCODE);
-  document.getElementById('configStatus').textContent = 'Saved.';
-  showToast('Config saved — reload to connect');
-}
-
-async function testConnection() {
-  const url = document.getElementById('scriptUrl').value.trim();
-  const status = document.getElementById('configStatus');
-  status.textContent = 'Testing...';
-  try {
-    const res = await fetch(url + '?action=ping');
-    const data = await res.json();
-    status.textContent = data.ok ? '✓ Connected!' : '✗ Script responded but returned an error.';
-  } catch(e) {
-    status.textContent = '✗ Could not connect. Check your URL and make sure the script is deployed as "Anyone".';
-  }
-}
-
-// ── TOAST ────────────────────────────────────────────────────
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
-}
-</script>
+<script src="app.js"></script>
 </body>
 </html>

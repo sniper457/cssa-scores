@@ -1,5 +1,5 @@
 // ── CONFIG ───────────────────────────────────────────────────
-var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxp7XmcAnHrrLASGJWZpAbY2uwxlcdhV2eJ7FZISMhFz7OnPvjINeJAXaMontfUXWW2/exec';
+var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXgVMUtvVtIlzVs1qh8c7Y-3RBNLWxERbbJqqa0yK5MLYQkH9oHIY73ybrN0zzj9gA/exec';
 var SCRIPT_URL = localStorage.getItem('cssa_script_url') || DEFAULT_SCRIPT_URL;
 var PASSCODE   = localStorage.getItem('cssa_passcode') || 'softball';
 

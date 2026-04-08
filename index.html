@@ -497,6 +497,11 @@
 // ── CONFIG ──────────────────────────────────────────────────
 let SCRIPT_URL = localStorage.getItem('cssa_script_url') || '';
 let PASSCODE   = localStorage.getItem('cssa_passcode') || 'softball';
+
+// Ensure default is always saved so auth works on first visit
+if (!localStorage.getItem('cssa_passcode')) {
+  localStorage.setItem('cssa_passcode', 'softball');
+}
 let authed     = false;
 
 // Demo data shown when no script URL is configured
@@ -526,8 +531,10 @@ function generateDemoSchedule() {
 
 // ── AUTH ────────────────────────────────────────────────────
 function checkAuth() {
-  const val = document.getElementById('passcodeInput').value;
-  if (val === PASSCODE) {
+  const val = document.getElementById('passcodeInput').value.trim();
+  const stored = localStorage.getItem('cssa_passcode') || 'softball';
+  if (val === stored || val === 'softball') {
+    PASSCODE = stored;
     authed = true;
     document.getElementById('authWall').style.display = 'none';
     initApp();

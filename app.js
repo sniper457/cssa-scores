@@ -1,5 +1,5 @@
 // ── CONFIG ───────────────────────────────────────────────────
-var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXgVMUtvVtIlzVs1qh8c7Y-3RBNLWxERbbJqqa0yK5MLYQkH9oHIY73ybrN0zzj9gA/exec';
+var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDM0PL9wbAICnbZRgKXqWWU2dLCdGyN-S1FwqmGVho1r6zRWBHU4UYFgyFfAiUV5DW/exec;
 var SCRIPT_URL = localStorage.getItem('cssa_script_url') || DEFAULT_SCRIPT_URL;
 var PASSCODE   = localStorage.getItem('cssa_passcode') || 'softball';
 
@@ -102,29 +102,30 @@ function doSaveScore(gameId, homeScore, awayScore, btn, savedLabel) {
     return;
   }
 
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'saveScore', gameId: gameId, homeScore: homeScore, awayScore: awayScore }),
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.success) {
-      btn.style.display = 'none';
-      savedLabel.style.display = 'block';
-      fetchData();
-      showToast('Score saved!');
-    } else {
+  var url = SCRIPT_URL + '?action=saveScore&passcode=' + encodeURIComponent(PASSCODE) +
+            '&gameId=' + encodeURIComponent(gameId) +
+            '&homeScore=' + encodeURIComponent(homeScore) +
+            '&awayScore=' + encodeURIComponent(awayScore);
+
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        btn.style.display = 'none';
+        savedLabel.style.display = 'block';
+        fetchData();
+        showToast('Score saved!');
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+        showToast('Error saving score');
+      }
+    })
+    .catch(function() {
       btn.disabled = false;
       btn.textContent = 'Save';
-      showToast('Error saving score');
-    }
-  })
-  .catch(function() {
-    btn.disabled = false;
-    btn.textContent = 'Save';
-    showToast('Network error');
-  });
+      showToast('Network error');
+    });
 }
 
 // ── STANDINGS ─────────────────────────────────────────────────

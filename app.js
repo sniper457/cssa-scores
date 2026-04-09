@@ -1,7 +1,7 @@
 // ── CONFIG ───────────────────────────────────────────────────
-var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDM0PL9wbAICnbZRgKXqWWU2dLCdGyN-S1FwqmGVho1r6zRWBHU4UYFgyFfAiUV5DW/exec;
+var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXgVMUtvVtIlzVs1qh8c7Y-3RBNLWxERbbJqqa0yK5MLYQkH9oHIY73ybrN0zzj9gA/exec';
 var SCRIPT_URL = localStorage.getItem('cssa_script_url') || DEFAULT_SCRIPT_URL;
-var PASSCODE   = localStorage.getItem('cssa_passcode') || 'softball';
+var PASSCODE   = 'softball';
 
 // ── DEMO DATA ────────────────────────────────────────────────
 var DEMO_TEAMS = ['Sluggers','Dirt Bags','Diamond Dogs','The Bench','Fly Ballers',
@@ -26,29 +26,17 @@ var DEMO_SCHEDULE = (function() {
 // ── AUTH ─────────────────────────────────────────────────────
 function checkAuth() {
   var val = document.getElementById('passcodeInput').value.trim();
-  var btn = document.getElementById('authEnterBtn');
-  btn.disabled = true;
-  btn.textContent = 'Checking...';
-
-  fetch(SCRIPT_URL + '?action=checkPasscode&passcode=' + encodeURIComponent(val))
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.valid) {
-        PASSCODE = val;
-        document.getElementById('authWall').style.display = 'none';
-        initApp();
-      } else {
-        document.getElementById('authError').textContent = 'Wrong passcode. Try again.';
-        document.getElementById('passcodeInput').value = '';
-        btn.disabled = false;
-        btn.textContent = 'Enter';
-      }
-    })
-    .catch(function() {
-      document.getElementById('authError').textContent = 'Could not reach server. Check connection.';
-      btn.disabled = false;
-      btn.textContent = 'Enter';
-    });
+  if (!val) {
+    document.getElementById('authError').textContent = 'Enter a passcode.';
+    return;
+  }
+  if (val === PASSCODE) {
+    document.getElementById('authWall').style.display = 'none';
+    initApp();
+  } else {
+    document.getElementById('authError').textContent = 'Wrong passcode. Try again.';
+    document.getElementById('passcodeInput').value = '';
+  }
 }
 
 // ── NAV ──────────────────────────────────────────────────────

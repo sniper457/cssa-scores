@@ -1,7 +1,7 @@
 // ── CONFIG ───────────────────────────────────────────────────
-var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXgVMUtvVtIlzVs1qh8c7Y-3RBNLWxERbbJqqa0yK5MLYQkH9oHIY73ybrN0zzj9gA/exec';
+var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwj-Jsd1MloVH0cfb89OyKtBoWKKoh-u1zO_fglakFAGYJ6t6BLx8eXeH-fulMwXcsP/exec';
 var SCRIPT_URL = localStorage.getItem('cssa_script_url') || DEFAULT_SCRIPT_URL;
-var PASSCODE   = 'blanco';
+var PASSCODE   = 'softball';
 
 // ── DEMO DATA ────────────────────────────────────────────────
 var DEMO_TEAMS = ['Sluggers','Dirt Bags','Diamond Dogs','The Bench','Fly Ballers',
@@ -11,12 +11,15 @@ var DEMO_SCHEDULE = (function() {
   var games = [], id = 1;
   for (var week = 1; week <= 10; week++) {
     for (var g = 0; g < 5; g++) {
+      var hasScores = week < 4;
       games.push({
         id: id++, week: week,
         home: DEMO_TEAMS[g * 2],
         away: DEMO_TEAMS[g * 2 + 1],
-        homeScore: week < 4 ? Math.floor(Math.random()*10)+2 : null,
-        awayScore: week < 4 ? Math.floor(Math.random()*10)+2 : null
+        homeScore:  hasScores ? Math.floor(Math.random()*10)+2 : null,
+        awayScore:  hasScores ? Math.floor(Math.random()*10)+2 : null,
+        homeScore2: hasScores ? Math.floor(Math.random()*10)+2 : null,
+        awayScore2: hasScores ? Math.floor(Math.random()*10)+2 : null
       });
     }
   }
@@ -26,10 +29,7 @@ var DEMO_SCHEDULE = (function() {
 // ── AUTH ─────────────────────────────────────────────────────
 function checkAuth() {
   var val = document.getElementById('passcodeInput').value.trim();
-  if (!val) {
-    document.getElementById('authError').textContent = 'Enter a passcode.';
-    return;
-  }
+  if (!val) { document.getElementById('authError').textContent = 'Enter a passcode.'; return; }
   if (val === PASSCODE) {
     document.getElementById('authWall').style.display = 'none';
     initApp();
@@ -51,15 +51,10 @@ function showView(name) {
 function initApp() {
   document.getElementById('scriptUrl').value = SCRIPT_URL;
   document.getElementById('passcodeConfig').value = PASSCODE;
-  if (SCRIPT_URL) {
-    fetchData();
-  } else {
-    renderDemoStandings();
-    renderDemoSchedule();
-  }
+  if (SCRIPT_URL) { fetchData(); } else { renderDemoStandings(); renderDemoSchedule(); }
 }
 
-// ── FETCH ─────────────────────────────────────────────────────
+// ── FETCH ────────────────────────────────────────────────────
 function fetchData() {
   fetch(SCRIPT_URL + '?action=getAll')
     .then(function(r) { return r.json(); })
@@ -76,24 +71,32 @@ function fetchData() {
     });
 }
 
-function doSaveScore(gameId, homeScore, awayScore, btn, savedLabel) {
+// ── SAVE SCORE ───────────────────────────────────────────────
+function doSaveScore(gameId, homeScore, awayScore, homeScore2, awayScore2, btn, savedLabel) {
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
   if (!SCRIPT_URL) {
     var game = DEMO_SCHEDULE.find(function(g) { return g.id === gameId; });
-    if (game) { game.homeScore = homeScore; game.awayScore = awayScore; }
+    if (game) {
+      game.homeScore = homeScore; game.awayScore = awayScore;
+      game.homeScore2 = homeScore2; game.awayScore2 = awayScore2;
+    }
     btn.style.display = 'none';
     savedLabel.style.display = 'block';
     renderDemoStandings();
-    showToast('Score saved (demo)');
+    showToast('Scores saved (demo)');
     return;
   }
 
-  var url = SCRIPT_URL + '?action=saveScore&passcode=' + encodeURIComponent(PASSCODE) +
-            '&gameId=' + encodeURIComponent(gameId) +
-            '&homeScore=' + encodeURIComponent(homeScore) +
-            '&awayScore=' + encodeURIComponent(awayScore);
+  var url = SCRIPT_URL +
+    '?action=saveScore' +
+    '&passcode=' + encodeURIComponent(PASSCODE) +
+    '&gameId=' + encodeURIComponent(gameId) +
+    '&homeScore=' + encodeURIComponent(homeScore) +
+    '&awayScore=' + encodeURIComponent(awayScore) +
+    '&homeScore2=' + encodeURIComponent(homeScore2) +
+    '&awayScore2=' + encodeURIComponent(awayScore2);
 
   fetch(url)
     .then(function(r) { return r.json(); })
@@ -102,27 +105,26 @@ function doSaveScore(gameId, homeScore, awayScore, btn, savedLabel) {
         btn.style.display = 'none';
         savedLabel.style.display = 'block';
         fetchData();
-        showToast('Score saved!');
+        showToast('Scores saved!');
       } else {
-        btn.disabled = false;
-        btn.textContent = 'Save';
-        showToast('Error saving score');
+        btn.disabled = false; btn.textContent = 'Save';
+        showToast('Error saving scores');
       }
     })
     .catch(function() {
-      btn.disabled = false;
-      btn.textContent = 'Save';
+      btn.disabled = false; btn.textContent = 'Save';
       showToast('Network error');
     });
 }
 
-// ── STANDINGS ─────────────────────────────────────────────────
+// ── STANDINGS ────────────────────────────────────────────────
 function calcStandings(games) {
   var teams = {};
   games.forEach(function(g) {
     [g.home, g.away].forEach(function(t) {
       if (!teams[t]) teams[t] = { name: t, w: 0, l: 0, rs: 0, ra: 0 };
     });
+    // Game 1
     if (g.homeScore !== null && g.awayScore !== null) {
       var h = teams[g.home], a = teams[g.away];
       h.rs += g.homeScore; h.ra += g.awayScore;
@@ -130,6 +132,15 @@ function calcStandings(games) {
       if (g.homeScore > g.awayScore) { h.w++; a.l++; }
       else if (g.awayScore > g.homeScore) { a.w++; h.l++; }
       else { h.w += 0.5; a.w += 0.5; }
+    }
+    // Game 2
+    if (g.homeScore2 !== null && g.awayScore2 !== null) {
+      var h2 = teams[g.home], a2 = teams[g.away];
+      h2.rs += g.homeScore2; h2.ra += g.awayScore2;
+      a2.rs += g.awayScore2; a2.ra += g.homeScore2;
+      if (g.homeScore2 > g.awayScore2) { h2.w++; a2.l++; }
+      else if (g.awayScore2 > g.homeScore2) { a2.w++; h2.l++; }
+      else { h2.w += 0.5; a2.w += 0.5; }
     }
   });
   return Object.values(teams).sort(function(a, b) {
@@ -166,7 +177,7 @@ function renderStandingsRows(standings) {
   });
 }
 
-// ── SCHEDULE ──────────────────────────────────────────────────
+// ── SCHEDULE ─────────────────────────────────────────────────
 function renderDemoSchedule() { renderSchedule(DEMO_SCHEDULE); }
 
 function renderSchedule(games) {
@@ -190,78 +201,123 @@ function renderSchedule(games) {
     div.appendChild(label);
 
     weeks[week].forEach(function(game) {
-      var scored = game.homeScore !== null && game.awayScore !== null;
-      var card = document.createElement('div');
-      card.className = 'game-card' + (scored ? ' scored' : '');
+      var scored1 = game.homeScore !== null && game.awayScore !== null;
+      var scored2 = game.homeScore2 !== null && game.awayScore2 !== null;
+      var bothScored = scored1 && scored2;
 
-      // Away side
+      var card = document.createElement('div');
+      card.className = 'game-card' + (bothScored ? ' scored' : '');
+
+      // ── Away side ──
       var awaySide = document.createElement('div');
       awaySide.className = 'team-side away';
-      var awayLabel = document.createElement('div');
-      awayLabel.className = 'team-label';
-      awayLabel.textContent = game.away;
-      var awayInput = document.createElement('input');
-      awayInput.className = 'score-input';
-      awayInput.type = 'number';
-      awayInput.min = '0'; awayInput.max = '99';
-      awayInput.placeholder = '—';
-      awayInput.id = 'away-' + game.id;
-      if (game.awayScore !== null) awayInput.value = game.awayScore;
-      awaySide.appendChild(awayLabel);
-      awaySide.appendChild(awayInput);
 
-      // VS middle
-      var vsBadge = document.createElement('div');
-      vsBadge.className = 'vs-badge';
+      var awayName = document.createElement('div');
+      awayName.className = 'team-label';
+      awayName.textContent = game.away;
+
+      var awayScores = document.createElement('div');
+      awayScores.className = 'score-pair';
+
+      var awayIn1 = document.createElement('input');
+      awayIn1.className = 'score-input'; awayIn1.type = 'number';
+      awayIn1.min = '0'; awayIn1.max = '99'; awayIn1.placeholder = 'G1';
+      awayIn1.id = 'away1-' + game.id;
+      if (scored1) awayIn1.value = game.awayScore;
+
+      var awayIn2 = document.createElement('input');
+      awayIn2.className = 'score-input'; awayIn2.type = 'number';
+      awayIn2.min = '0'; awayIn2.max = '99'; awayIn2.placeholder = 'G2';
+      awayIn2.id = 'away2-' + game.id;
+      if (scored2) awayIn2.value = game.awayScore2;
+
+      awayScores.appendChild(awayIn1);
+      awayScores.appendChild(awayIn2);
+      awaySide.appendChild(awayName);
+      awaySide.appendChild(awayScores);
+
+      // ── Middle ──
+      var middle = document.createElement('div');
+      middle.className = 'vs-badge';
+
       var vsText = document.createElement('div');
       vsText.textContent = 'VS';
+
+      var g1label = document.createElement('div');
+      g1label.className = 'game-num-label';
+      g1label.textContent = 'G1';
+
+      var g2label = document.createElement('div');
+      g2label.className = 'game-num-label';
+      g2label.textContent = 'G2';
+
       var saveBtn = document.createElement('button');
       saveBtn.type = 'button';
       saveBtn.className = 'save-btn';
       saveBtn.id = 'btn-' + game.id;
       saveBtn.textContent = 'Save';
-      if (scored) saveBtn.style.display = 'none';
+      if (bothScored) saveBtn.style.display = 'none';
+
       var savedLabel = document.createElement('div');
       savedLabel.className = 'saved-label';
       savedLabel.id = 'saved-' + game.id;
-      savedLabel.textContent = scored ? '✓ saved' : '';
-      savedLabel.style.display = scored ? 'block' : 'none';
-      vsBadge.appendChild(vsText);
-      vsBadge.appendChild(saveBtn);
-      vsBadge.appendChild(savedLabel);
+      savedLabel.textContent = bothScored ? '✓ saved' : '';
+      savedLabel.style.display = bothScored ? 'block' : 'none';
 
-      // Home side
+      middle.appendChild(vsText);
+      middle.appendChild(g1label);
+      middle.appendChild(g2label);
+      middle.appendChild(saveBtn);
+      middle.appendChild(savedLabel);
+
+      // ── Home side ──
       var homeSide = document.createElement('div');
       homeSide.className = 'team-side';
-      var homeLabel = document.createElement('div');
-      homeLabel.className = 'team-label';
-      homeLabel.textContent = game.home;
-      var homeInput = document.createElement('input');
-      homeInput.className = 'score-input';
-      homeInput.type = 'number';
-      homeInput.min = '0'; homeInput.max = '99';
-      homeInput.placeholder = '—';
-      homeInput.id = 'home-' + game.id;
-      if (game.homeScore !== null) homeInput.value = game.homeScore;
-      homeSide.appendChild(homeLabel);
-      homeSide.appendChild(homeInput);
+
+      var homeName = document.createElement('div');
+      homeName.className = 'team-label';
+      homeName.textContent = game.home;
+
+      var homeScores = document.createElement('div');
+      homeScores.className = 'score-pair';
+
+      var homeIn1 = document.createElement('input');
+      homeIn1.className = 'score-input'; homeIn1.type = 'number';
+      homeIn1.min = '0'; homeIn1.max = '99'; homeIn1.placeholder = 'G1';
+      homeIn1.id = 'home1-' + game.id;
+      if (scored1) homeIn1.value = game.homeScore;
+
+      var homeIn2 = document.createElement('input');
+      homeIn2.className = 'score-input'; homeIn2.type = 'number';
+      homeIn2.min = '0'; homeIn2.max = '99'; homeIn2.placeholder = 'G2';
+      homeIn2.id = 'home2-' + game.id;
+      if (scored2) homeIn2.value = game.homeScore2;
+
+      homeScores.appendChild(homeIn1);
+      homeScores.appendChild(homeIn2);
+      homeSide.appendChild(homeName);
+      homeSide.appendChild(homeScores);
 
       card.appendChild(awaySide);
-      card.appendChild(vsBadge);
+      card.appendChild(middle);
       card.appendChild(homeSide);
 
-      // Save button click
+      // Save click
       (function(gid, btn, lbl) {
         btn.addEventListener('click', function() {
-          var hs = parseInt(document.getElementById('home-' + gid).value);
-          var as = parseInt(document.getElementById('away-' + gid).value);
-          if (isNaN(hs) || isNaN(as)) { showToast('Enter both scores first'); return; }
-          doSaveScore(gid, hs, as, btn, lbl);
+          var h1 = parseInt(document.getElementById('home1-' + gid).value);
+          var a1 = parseInt(document.getElementById('away1-' + gid).value);
+          var h2 = parseInt(document.getElementById('home2-' + gid).value);
+          var a2 = parseInt(document.getElementById('away2-' + gid).value);
+          if (isNaN(h1) || isNaN(a1) || isNaN(h2) || isNaN(a2)) {
+            showToast('Enter all 4 scores first'); return;
+          }
+          doSaveScore(gid, h1, a1, h2, a2, btn, lbl);
         });
       })(game.id, saveBtn, savedLabel);
 
-      // Re-show save btn on input change
-      [homeInput, awayInput].forEach(function(inp) {
+      // Re-show save on any input change
+      [homeIn1, homeIn2, awayIn1, awayIn2].forEach(function(inp) {
         inp.addEventListener('input', function() {
           saveBtn.style.display = 'inline-block';
           savedLabel.style.display = 'none';
@@ -277,7 +333,7 @@ function renderSchedule(games) {
   });
 }
 
-// ── CONFIG ────────────────────────────────────────────────────
+// ── CONFIG ───────────────────────────────────────────────────
 function saveConfig() {
   SCRIPT_URL = document.getElementById('scriptUrl').value.trim();
   localStorage.setItem('cssa_script_url', SCRIPT_URL);
@@ -291,15 +347,11 @@ function testConnection() {
   status.textContent = 'Testing...';
   fetch(url + '?action=ping')
     .then(function(r) { return r.json(); })
-    .then(function(data) {
-      status.textContent = data.ok ? '✓ Connected!' : '✗ Script error.';
-    })
-    .catch(function() {
-      status.textContent = '✗ Could not connect. Check URL and deploy settings.';
-    });
+    .then(function(data) { status.textContent = data.ok ? '✓ Connected!' : '✗ Script error.'; })
+    .catch(function() { status.textContent = '✗ Could not connect.'; });
 }
 
-// ── TOAST ─────────────────────────────────────────────────────
+// ── TOAST ────────────────────────────────────────────────────
 var toastTimer;
 function showToast(msg) {
   var t = document.getElementById('toast');
@@ -309,7 +361,7 @@ function showToast(msg) {
   toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2500);
 }
 
-// ── WIRE UP EVENTS ────────────────────────────────────────────
+// ── WIRE UP ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('authEnterBtn').addEventListener('click', checkAuth);
   document.getElementById('passcodeInput').addEventListener('keydown', function(e) {

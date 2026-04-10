@@ -1,7 +1,7 @@
 // ── CONFIG ───────────────────────────────────────────────────
 var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwj-Jsd1MloVH0cfb89OyKtBoWKKoh-u1zO_fglakFAGYJ6t6BLx8eXeH-fulMwXcsP/exec';
 var SCRIPT_URL = localStorage.getItem('cssa_script_url') || DEFAULT_SCRIPT_URL;
-var PASSCODE   = 'softball';
+var PASSCODE   = 'blanco';
 
 // ── DEMO DATA ────────────────────────────────────────────────
 var DEMO_TEAMS = ['Sluggers','Dirt Bags','Diamond Dogs','The Bench','Fly Ballers',

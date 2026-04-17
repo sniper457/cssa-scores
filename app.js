@@ -1,5 +1,5 @@
 // ── CONFIG ───────────────────────────────────────────────────
-var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwj-Jsd1MloVH0cfb89OyKtBoWKKoh-u1zO_fglakFAGYJ6t6BLx8eXeH-fulMwXcsP/exec';
+var DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwit0lbmXigGmgaq52m2FMrhnrliqV5AqSLkzWzA3AF_LXS71L9zHncx0cYtwhcdJ3U/exec';
 var SCRIPT_URL = localStorage.getItem('cssa_script_url') || DEFAULT_SCRIPT_URL;
 var PASSCODE   = 'blanco';
 
